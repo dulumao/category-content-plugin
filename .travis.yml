@@ -14,17 +14,11 @@ php:
 #  - 7.0
 
 env:
-  - DB=mysql USER=root DBNAME=myapp_test DBPASS=' ' DBUSER=root
-  - DB=pgsql USER=postgres DBNAME=myapp_test DBPASS=password DBUSER=postgres
-  - DB=sqlite3
+  - ECCUBE_VERSION=3.0.8
+  - ECCUBE_VERSION=3.0.9
 
 matrix:
   fast_finish: true
-  include:
-    - php: 5.6
-      env: ECCUBE_VERSION=3.0.8
-    - php: 5.6
-      env: ECCUBE_VERSION=3.0.9
 
 before_script:
   - tar cvzf $HOME/plugin.tar.gz ./*
@@ -33,8 +27,9 @@ before_script:
   - git checkout -b ${ECCUBE_VERSION} refs/tags/${ECCUBE_VERSION}
   - composer selfupdate
   - composer install --dev --no-interaction -o
-  - sh ./eccube_install.sh ${DB} none
-  - php ./app/console plugin:develop install --path=$HOME/plugin.tar.gz
+  - sh eccube_install.sh sqlite3 none
+  - php app/console plugin:develop install --path=$HOME/plugin.tar.gz
+  - cd ../
 
 #script:
 #  - if [[ $TRAVIS_PHP_VERSION =~ ^hhvm ]]; then phpunit --coverage-clover=coverage.clover ; fi
