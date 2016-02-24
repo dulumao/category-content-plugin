@@ -7,27 +7,35 @@ cache:
     - $HOME/.composer/cache
 
 php:
-#  - 5.3
+  - 5.3
 #  - 5.4
-  - 5.5
+#  - 5.5
   - 5.6
 #  - 7.0
 
 env:
-  - ECCUBE_VERSION=3.0.8
-  - ECCUBE_VERSION=3.0.9
+  - ECCUBE_VERSION=3.0.8 DB=mysql USER=root DBNAME=myapp_test DBPASS=' ' DBUSER=root
+  - ECCUBE_VERSION=3.0.8 DB=pgsql USER=postgres DBNAME=myapp_test DBPASS=password DBUSER=postgres
+  - ECCUBE_VERSION=3.0.9 DB=mysql USER=root DBNAME=myapp_test DBPASS=' ' DBUSER=root
+  - ECCUBE_VERSION=3.0.9 DB=pgsql USER=postgres DBNAME=myapp_test DBPASS=password DBUSER=postgres
 
 matrix:
   fast_finish: true
 
 before_script:
+  # archive plugin
   - tar cvzf $HOME/plugin.tar.gz ./*
+  # clone ec-cube
   - git clone https://github.com/EC-CUBE/ec-cube.git
   - cd ec-cube
+  # checkout version
   - git checkout -b ${ECCUBE_VERSION} refs/tags/${ECCUBE_VERSION}
+  # update composer
   - composer selfupdate
   - composer install --dev --no-interaction -o
+  # install ec-cube
   - sh eccube_install.sh sqlite3 none
+  # install plugin
   - php app/console plugin:develop install --path=$HOME/plugin.tar.gz
   - cd ../
 
