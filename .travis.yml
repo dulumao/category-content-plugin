@@ -14,19 +14,23 @@ php:
 #  - 7.0
 
 env:
-  # ec-cube 3.0.8
-  - ECCUBE_VERSION=3.0.8 DB=mysql USER=root DBNAME=myapp_test DBPASS=' ' DBUSER=root
-  - ECCUBE_VERSION=3.0.8 DB=pgsql USER=postgres DBNAME=myapp_test DBPASS=password DBUSER=postgres
-  # ec-cube 3.0.9
-  - ECCUBE_VERSION=3.0.9 DB=mysql USER=root DBNAME=myapp_test DBPASS=' ' DBUSER=root
-  - ECCUBE_VERSION=3.0.9 DB=pgsql USER=postgres DBNAME=myapp_test DBPASS=password DBUSER=postgres
+  # plugin code
+  global:
+    PLUGIN_CODE=CategoryContent
+  matrix:
+    # ec-cube 3.0.8
+    - ECCUBE_VERSION=3.0.8 DB=mysql USER=root DBNAME=myapp_test DBPASS=' ' DBUSER=root
+    - ECCUBE_VERSION=3.0.8 DB=pgsql USER=postgres DBNAME=myapp_test DBPASS=password DBUSER=postgres
+    # ec-cube 3.0.9
+    - ECCUBE_VERSION=3.0.9 DB=mysql USER=root DBNAME=myapp_test DBPASS=' ' DBUSER=root
+    - ECCUBE_VERSION=3.0.9 DB=pgsql USER=postgres DBNAME=myapp_test DBPASS=password DBUSER=postgres
 
 matrix:
   fast_finish: true
 
 before_script:
   # archive plugin
-  - tar cvzf $HOME/plugin.tar.gz ./*
+  - tar cvzf ${HOME}/${PLUGIN_CODE}.tar.gz ./*
   # clone ec-cube
   - git clone https://github.com/EC-CUBE/ec-cube.git
   - cd ec-cube
@@ -38,10 +42,8 @@ before_script:
   # install ec-cube
   - sh eccube_install.sh ${DB} none
   # install plugin
-  - php app/console plugin:develop install --path=$HOME/plugin.tar.gz
-  - cd ../
+  - php app/console plugin:develop install --path=${HOME}/${PLUGIN_CODE}.tar.gz
 
-#script:
-#  - if [[ $TRAVIS_PHP_VERSION =~ ^hhvm ]]; then phpunit --coverage-clover=coverage.clover ; fi
-#  - if [[ $TRAVIS_PHP_VERSION =~ ^[57] ]]; then phpunit ; fi
-
+script:
+  # exec phpunit on ec-cube
+  - phpunit app/Plugin/${PLUGIN_CODE}/Tests
